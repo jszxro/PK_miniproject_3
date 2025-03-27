@@ -16,7 +16,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stacked_widget)
 
         # 로그인 페이지와 메인 페이지 추가
-        self.login_page = LoginPage(self.stacked_widget)
+        self.login_page = LoginPage(self.stacked_widget, self.set_user_role)
         self.main_page = MainPage(self.stacked_widget)
         self.register_page = RegisterPage(self.stacked_widget)
 
@@ -27,6 +27,9 @@ class MainWindow(QMainWindow):
         # 초기 페이지 설정
         self.stacked_widget.setCurrentIndex(1)  # 메인 페이지로 시작
 
+    def set_user_role(self, role):
+        self.main_page.cst_role = role # 사용자 역할 설정
+        self.main_page.render_navbar(initial=False)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

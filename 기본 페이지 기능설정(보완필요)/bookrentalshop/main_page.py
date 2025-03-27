@@ -1,12 +1,14 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea, QMessageBox
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
+from subprocess import Popen
 
 
 class MainPage(QWidget):
-    def __init__(self, stacked_widget):
+    def __init__(self, stacked_widget, cst_role=None):
         super().__init__()
         self.stacked_widget = stacked_widget
+        self.cst_role = cst_role
         self.initUI()
 
     def initUI(self):
@@ -67,6 +69,8 @@ class MainPage(QWidget):
                 ("마이페이지", lambda: print("마이페이지 이동")),
                 ("로그아웃", self.logout)
             ]
+            if self.cst_role == 'admin':
+                buttons.insert(1, ("관리자용 책 관리", self.open_book_register))
 
         for text, slot in buttons:
             btn = QPushButton(text)
@@ -91,4 +95,12 @@ class MainPage(QWidget):
     def logout(self):
         QMessageBox.information(self, "로그아웃", "로그아웃 되었습니다.")
         self.render_navbar(initial=True)
+
+         # 로그인 페이지의 입력 필드 초기화
+        login_page = self.stacked_widget.widget(0)  # 로그인 페이지 가져오기
+        login_page.clear_inputs()
+
         self.stacked_widget.setCurrentIndex(0)  # 로그인 페이지로 전환
+
+    def open_book_register(self):
+        Popen(["python", "./bookrentalshop/bookregistermain.py"])

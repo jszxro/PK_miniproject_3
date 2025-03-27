@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self.loadData()
 
     def initUI(self):
-        uic.loadUi('bookregisterdb_ss.ui', self)
+        uic.loadUi('./bookrentalshop/bookregisterdb_ss.ui', self)
         self.setWindowTitle('도서 등록 및 수정(관리자용)')
         self.setWindowIcon(QIcon('book.png'))
 

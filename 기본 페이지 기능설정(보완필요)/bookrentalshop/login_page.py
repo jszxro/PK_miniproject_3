@@ -14,9 +14,10 @@ DB_CONFIG = {
 
 
 class LoginPage(QWidget):
-    def __init__(self, stacked_widget):
+    def __init__(self, stacked_widget,set_cst_role):
         super().__init__()
         self.stacked_widget = stacked_widget
+        self.set_cst_role = set_cst_role
         self.initUI()
 
     def clear_inputs(self):
@@ -73,18 +74,23 @@ class LoginPage(QWidget):
             connection = cx_Oracle.connect(**DB_CONFIG)
             cursor = connection.cursor()
 
-            query = "SELECT COUNT(*) FROM customerinfo WHERE cst_email = :email AND cst_pwd = :password"
+            query = """
+                SELECT CST_ROLE FROM CUSTOMERINFO
+                WHERE CST_EMAIL = :email AND CST_PWD = :password
+            """
             cursor.execute(query, {'email': email, 'password': password})
             result = cursor.fetchone()
 
-            if result[0] > 0:
+            if result:
+                role = result[0] # 사용자 역할 (admin 또는 user)
+                self.set_cst_role(role)  # 사용자 역할 설정
                 QMessageBox.information(self, "로그인 성공", "환영합니다!")
-                # 메인 페이지로 전환
                 main_page = self.stacked_widget.widget(1)  # 메인 페이지 가져오기
                 main_page.render_navbar(initial=False)  # 네비게이션 바 업데이트
                 self.stacked_widget.setCurrentIndex(1)  # 메인 페이지로 전환
             else:
                 QMessageBox.warning(self, "로그인 실패", "이메일 또는 비밀번호가 잘못되었습니다.")
+
         except cx_Oracle.DatabaseError as e:
             QMessageBox.critical(self, "DB 오류", f"데이터베이스 연결에 실패했습니다.\n{str(e)}")
         finally:
