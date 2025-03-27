@@ -2,7 +2,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
 from subprocess import Popen
-
+import sys
+sys.path.append("C:/Users/jszxr/MyJupyter/PK_miniproject_3/기본 페이지 기능설정(보완필요)/bookrentalshop")
+from bookregistermain import BookRegisterPage
 
 class MainPage(QWidget):
     def __init__(self, stacked_widget, cst_role=None):
@@ -70,7 +72,7 @@ class MainPage(QWidget):
                 ("로그아웃", self.logout)
             ]
             if self.cst_role == 'admin':
-                buttons.insert(1, ("관리자용 책 관리", self.open_book_register))
+                buttons.insert(1, ("관리자용 도서 관리", self.open_book_register))
 
         for text, slot in buttons:
             btn = QPushButton(text)
@@ -103,4 +105,5 @@ class MainPage(QWidget):
         self.stacked_widget.setCurrentIndex(0)  # 로그인 페이지로 전환
 
     def open_book_register(self):
-        Popen(["python", "./bookrentalshop/bookregistermain.py"])
+        self.book_register_window = BookRegisterPage()
+        self.book_register_window.show()

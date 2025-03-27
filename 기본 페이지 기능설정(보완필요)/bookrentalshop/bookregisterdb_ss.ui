@@ -10,12 +10,12 @@
     <height>490</height>
    </rect>
   </property>
-  <property name="maximumSize">
+  <!-- <property name="maximumSize">
    <size>
     <width>1300</width>
     <height>490</height>
-   </size>
-  </property>
+   </size> -->
+  <!-- </property> -->
   <property name="font">
    <font>
     <family>D2Coding ligature</family>
