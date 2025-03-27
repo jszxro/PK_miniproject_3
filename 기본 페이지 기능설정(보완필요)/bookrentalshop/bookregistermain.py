@@ -1,3 +1,4 @@
+import os
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -14,34 +15,97 @@ username = 'bookrentalshop'
 password = '12345'
 basic_msg = '도서 등록 / 수정 (관리자용) v1.0'
 
-class MainWindow(QMainWindow): 
-    def __init__(self):       
-        super(MainWindow,self).__init__()
-        self.initUI()
-        self.loadData()
-
-    def initUI(self):
-        uic.loadUi('./bookrentalshop/bookregisterdb_ss.ui', self)
+class BookRegisterPage(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        # uic.loadUi('./bookrentalshop/bookregisterdb_ss.ui', self)
+        basedir = os.path.dirname(os.path.abspath(__file__))
+        ui_path = os.path.join(basedir, 'bookregisterdb_ss.ui')
+        uic.loadUi(ui_path, self)
         self.setWindowTitle('도서 등록 및 수정(관리자용)')
         self.setWindowIcon(QIcon('book.png'))
 
         # 상태바에 메세지 추가
         self.statusbar.showMessage(basic_msg)
 
-
         # 버튼에 아이콘 추가
         self.btn_add.setIcon(QIcon('plus.png'))
         self.btn_mod.setIcon(QIcon('edit.png'))
         self.btn_del.setIcon(QIcon('minus.png'))
-    
-    # 버튼 시그널(이벤트) 추가
+
+        # 버튼 시그널(이벤트) 추가
         self.btn_add.clicked.connect(self.btnAddClick)
         self.btn_mod.clicked.connect(self.btnModClick)
         self.btn_del.clicked.connect(self.btnDelClick)
-        # 테이블위젯 더블클릭 시그널 추가
+
+        # 테이블 위젯 더블클릭 시그널 추가
         self.tblBooks.doubleClicked.connect(self.tblBooksDoubleClick)
+
+        # 데이터 로드
+        self.loadData()
+
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #f9f9f9;
+            }
+
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #cdeac0;
+                border-radius: 8px;
+                margin-top: 10px;
+            }
+
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top center;
+                padding: 0 3px;
+                color: #333333;
+                font-size: 14px;
+            }
+
+            QPushButton {
+                background-color: #cdeac0;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-weight: bold;
+            }
+
+            QPushButton:hover {
+                background-color: #b5ddb0;
+            }
+
+            QLineEdit {
+                border: 1px solid #cccccc;
+                border-radius: 4px;
+                padding: 4px 8px;
+                background-color: #ffffff;
+            }
+
+            QTableWidget {
+                border: 1px solid #ccc;
+                gridline-color: #ddd;
+                background-color: #ffffff;
+            }
+
+            QHeaderView::section {
+                background-color: #cdeac0;
+                padding: 4px;
+                border: 1px solid #ddd;
+                font-weight: bold;
+            }
+        """)
+        for widget in [
+            self.input_book_idno, self.input_book_type, self.input_book_name,
+            self.input_book_edit, self.input_book_date, self.input_book_cost
+        ]:
+            widget.setMinimumWidth(300)
+
+        self.setFixedSize(1500, 600)
+
+        # 창 띄우기
         self.show()
-        ### 함수를 만들면 반드시 함수선언을 할 것!!!
     
 
     # 화면의 인풋위젯 데이터 초기화함수
@@ -52,6 +116,7 @@ class MainWindow(QMainWindow):
         self.input_book_date.clear()
         self.input_book_type.clear()
         self.input_book_cost.clear()
+
 
     # 테이블위젯 더블클릭 시그널처리 함수 !
     def tblBooksDoubleClick(self):
@@ -185,6 +250,18 @@ class MainWindow(QMainWindow):
             self.tblBooks.setItem(i,4,QTableWidgetItem(str(release_dt)))
             self.tblBooks.setItem(i,5,QTableWidgetItem(str(book_price)))
             # i+=1
+        self.tblBooks.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        header = self.tblBooks.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Interactive)  # 각 열 비율 수동 조절
+
+        # # 열 너비 비율 설정 (인덱스 순서: 0~5)
+        # header.resizeSection(0, 80)   # 도서 ID
+        # header.resizeSection(1, 80)   # 분류
+        # header.resizeSection(2, 200)  # 도서 제목
+        # header.resizeSection(3, 140)  # 저자
+        # header.resizeSection(4, 140)  # 출판일자
+        # header.resizeSection(5, 100)  # 가격
 
     # R(SELECT)
     def loadData(self):
@@ -301,7 +378,14 @@ class MainWindow(QMainWindow):
         return isSucceed
 
        
-if __name__=='__main__':
+# if __name__=='__main__':
+#     app = QApplication(sys.argv)
+#     win = MainWindow()                 
+#     app.exec_()
+
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    win = MainWindow()                 
+    win = BookRegisterPage()  # 디버깅 시 실행용
+    win.show()
     app.exec_()
+
