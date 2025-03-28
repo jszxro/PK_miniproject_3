@@ -39,6 +39,12 @@ class MainWindow(QMainWindow):
         # 🔹 더블 클릭 시 편집 방지
         self.tblbook.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
+        # # ✅ 고객 정보 테이블 추가
+        # self.tblCustomer.setSelectionMode(QAbstractItemView.SingleSelection)
+        # self.tblCustomer.setColumnCount(1)
+        # self.tblCustomer.setHorizontalHeaderLabels(['고객 이름'])
+        # self.tblCustomer.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
         # 버튼에 아이콘 추가
         # self.btn_sea.setIcon(QIcon('./image/book_sea.png'))
         # self.btn_sea.setIconSize(QSize(50, 50))
@@ -62,7 +68,7 @@ class MainWindow(QMainWindow):
     def loadData(self):
         conn = self.connectDB()
         cursor = conn.cursor()
-        query = '''SELECT BOOK_NAME, AUTHOR, PUBLISHER FROM BOOKINFO''' 
+        query = '''SELECT BOOK_NAME, AUTHOR, PUBLISHER, LOAN_YN, LOAN_USER FROM BOOKINFO''' 
         cursor.execute(query)
         
         books = cursor.fetchall()
@@ -70,18 +76,46 @@ class MainWindow(QMainWindow):
         
         for i, row in enumerate(books):
             for j, col in enumerate(row):
-                self.tblbook.setItem(i, j, QTableWidgetItem(str(col)))
+                if j == 3:  # 🔹 대출 여부 변환
+                    loan_status = "불가능" if col != "가능" else "불가능"
+                    self.tblbook.setItem(i, j, QTableWidgetItem(loan_status))
+                else:
+                    self.tblbook.setItem(i, j, QTableWidgetItem(str(col)))
+                #self.tblbook.setItem(i, j, QTableWidgetItem(str(col)))
         
         cursor.close()
         conn.close()
+
+    def loadCustomerData(self):
+        """고객 정보를 불러와서 테이블에 표시"""
+        conn = self.connectDB()
+        cursor = conn.cursor()
+        query = "SELECT CST_NAMES FROM CUSTOMERINFO"
+        cursor.execute(query)
+    
+        customers = cursor.fetchall()
+        self.tblCustomer.setRowCount(len(customers))  # 행 개수 설정
+    
+        for i, row in enumerate(customers):
+            for j, col in enumerate(row):
+                self.tblCustomer.setItem(i, j, QTableWidgetItem(str(col)))
+    
+        cursor.close()
+        conn.close()
+
+        # ✅ 데이터 로드
+        self.loadData()  # 도서 데이터
+        self.loadCustomerData()  # 고객 데이터
+
+        self.show()
 
     
     def getInputValues(self):
         return (
             self.input_std_name.text(),
             self.input_std_author.text(),
-            self.input_std_pub.text(),
-            self.input_std_div.text()
+            self.input_std_pub.text()
+            # self.input_std_div.text()
         )
     
     def tblbookDoubleClick(self):
@@ -120,9 +154,10 @@ class MainWindow(QMainWindow):
             return  # 사용자가 "아니오"를 선택하면 초기화 취소
     # 입력 필드 초기화
         self.input_std_name.clear()
+        self.input_std_name.clear()
         self.input_std_author.clear()
         self.input_std_pub.clear()
-        self.input_std_div.clear()
+        # self.input_std_div.clear()
 
         # 🔹 대출/반납 버튼 비활성화
         self.btn_bor.setEnabled(False)
@@ -146,7 +181,7 @@ class MainWindow(QMainWindow):
         cursor = conn.cursor()
 
     # 조건문 동적으로 설정
-        query = "SELECT BOOK_NAME, AUTHOR, PUBLISHER FROM BOOKINFO WHERE 1=1"
+        query = "SELECT BOOK_NAME, AUTHOR, PUBLISHER, LOAN_YN, LOAN_USER FROM BOOKINFO WHERE 1=1"
         params = []
 
         if search_book_name:
@@ -168,7 +203,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, '조회 실패', '해당 도서를 찾을 수 없습니다!')
 
             # 전체 데이터 다시 조회
-            cursor.execute("SELECT BOOK_NAME, AUTHOR, PUBLISHER FROM BOOKINFO")
+            cursor.execute("SELECT BOOK_NAME, AUTHOR, PUBLISHER, LOAN_YN, LOAN_USER FROM BOOKINFO")
             books = cursor.fetchall()
 
         if not books:
@@ -192,72 +227,148 @@ class MainWindow(QMainWindow):
         cursor.close()
         conn.close()
 
-  
-    
     def btnBorClick(self):
         values = self.getInputValues()
         search_book_name, search_author, search_publisher = values[0], values[1], values[2]
-        if not search_book_name and not search_author and not search_publisher:
-            QMessageBox.warning(self, '경고', '도서 제목이나 저자를 입력하세요!')
+        loan_user = self.input_std_username.text().strip()
+
+        if not search_book_name:
+            QMessageBox.warning(self, '경고', '도서 제목을 입력하세요!')
             return
-        
-        # 🔹 대출 확인 메시지
-        reply = QMessageBox.question(self, '대출 확인', '정말 대출하시겠습니까?', 
-                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.No:
-            return  # 사용자가 "아니오"를 선택하면 대출 취소
+        if not loan_user:
+            QMessageBox.warning(self, '경고', '대출자를 입력하세요!')
+            return
 
         conn = self.connectDB()
         cursor = conn.cursor()
 
-    # 먼저 해당 도서의 대출 가능 여부 확인
-        cursor.execute("SELECT LOAN_YN FROM BOOKINFO WHERE BOOK_NAME = :1", (search_book_name, search_author, search_publisher))
-        book = cursor.fetchone()
+        try:
+        # 🔹 고객 존재 여부 확인
+            cursor.execute("SELECT CST_NAMES FROM CUSTOMERINFO WHERE CST_NAMES = :1", (loan_user,))
+            customer = cursor.fetchone()
 
-        if not book:
-            QMessageBox.warning(self, '대출 실패', '해당 도서가 존재하지 않습니다.')
-        elif book[0] == 'Y':  # 이미 대출된 상태
-            QMessageBox.warning(self, '대출 실패', '대출이 불가능합니다.')
-        else:
-        # 대출 가능하면 대출 처리
-            query = "UPDATE BOOKINFO SET LOAN_YN='Y', LOAN_USER='사용자' WHERE BOOK_NAME = :1"
-            cursor.execute(query, (search_book_name, search_author, search_publisher))
+            if not customer:
+                QMessageBox.warning(self, '대출 불가', '해당 이름의 고객이 존재하지 않습니다!')
+                return
+
+        # 🔹 도서의 대출 가능 여부 확인
+            cursor.execute("SELECT LOAN_YN FROM BOOKINFO WHERE BOOK_NAME = :1", (search_book_name,))
+            book = cursor.fetchone()
+
+            if not book:
+                QMessageBox.warning(self, '대출 실패', '해당 도서가 존재하지 않습니다.')
+                return
+            elif book[0] == '불가능':  # 이미 대출된 상태
+                QMessageBox.warning(self, '대출 실패', '이미 대출 중인 도서입니다.')
+                return
+
+        # 🔹 대출 처리 (BOOKINFO 테이블 업데이트)
+            query_update_book = """
+                UPDATE BOOKINFO
+                SET LOAN_YN = '불가능', LOAN_USER = :1
+                WHERE BOOK_NAME = :2
+            """
+            cursor.execute(query_update_book, (loan_user, search_book_name))
+
+        # 🔹 RENTAL 테이블에 대출 기록 추가
+            # query_insert_rental = """
+            #     INSERT INTO RENTAL (BOOK_NAME, CUST_NAME, RENT_DATE)
+            #     VALUES (:1, :2, SYSDATE)
+            # """
+            # cursor.execute(query_insert_rental, (search_book_name, loan_user))
+
+            conn.commit()  # 변경 사항 저장
+
+            QMessageBox.about(self, '대출 완료', f'"{search_book_name}" 도서가 "{loan_user}"님께 대출되었습니다!')
+
+            # 🔹 대출 여부 자동 업데이트 (대출되지 않은 도서는 '가능'으로 설정)
+            self.updateLoanStatus()
+
+        # UI 업데이트
+            self.loadData()
+
+        except Exception as e:
+            conn.rollback()  # 오류 발생 시 롤백
+            QMessageBox.critical(self, '오류 발생', f'오류 내용: {str(e)}')
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def updateLoanStatus(self):
+        """ 대출 여부(LOAN_YN) 업데이트: 대출자가 있으면 '불가능', 없으면 '가능' """
+        conn = self.connectDB()
+        cursor = conn.cursor()
+
+        try:
+            query_update_status = """
+                UPDATE BOOKINFO
+                SET LOAN_YN = CASE 
+                    WHEN LOAN_USER IS NULL OR LOAN_USER = '' THEN '가능'
+                    ELSE '불가능'
+                END
+            """
+            cursor.execute(query_update_status)
             conn.commit()
 
-            QMessageBox.about(self, '대출 완료', '도서가 대출되었습니다!')
+        except Exception as e:
+            QMessageBox.warning(self, '오류 발생', f'오류 내용: {str(e)}')
 
-        cursor.close()
-        conn.close()
-    
-        self.loadData()  # 테이블 최신화
+        finally:
+            cursor.close()
+            conn.close()
+
 
     
     def btnRetClick(self):
-        book_name = self.input_std_name.text()
-        if not book_name:
-            QMessageBox.warning(self, '경고', '도서 제목이나 저자를 입력하세요!')
+        """도서 반납 기능"""
+        search_book_name = self.input_std_name.text().strip()
+
+        if not search_book_name:
+            QMessageBox.warning(self, '경고', '반납할 도서 제목을 입력하세요!')
             return
-        
-         # 🔹 반납 확인 메시지
-        reply = QMessageBox.question(self, '반납 확인', '정말 반납을 완료하시겠습니까?', 
-                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.No:
-            return  # 사용자가 "아니오"를 선택하면 반납 취소
-        
+
         conn = self.connectDB()
         cursor = conn.cursor()
-        query = "UPDATE BOOKINFO SET LOAN_YN='N', LOAN_USER=NULL WHERE BOOK_NAME = :1"
-        cursor.execute(query, (book_name))
-        conn.commit()
-        
-        if cursor.rowcount:
-            QMessageBox.about(self, '반납 완료', '도서가 반납되었습니다!')
-        else:
-            QMessageBox.warning(self, '반납 실패', '해당 도서를 반납할 수 없습니다.')
-        
-        cursor.close()
-        conn.close()
-        self.loadData()
+
+        try:
+        # 🔹 해당 도서가 대출 중인지 확인
+            cursor.execute("SELECT LOAN_USER FROM BOOKINFO WHERE BOOK_NAME = :1", (search_book_name,))
+            book = cursor.fetchone()
+
+            if not book:
+                QMessageBox.warning(self, '반납 실패', '해당 도서가 존재하지 않습니다.')
+                return
+            elif book[0] is None or book[0] == '':
+                QMessageBox.warning(self, '반납 실패', '이 도서는 이미 반납된 상태입니다.')
+                return
+
+        # 🔹 반납 처리 (BOOKINFO 테이블 업데이트)
+            query_return_book = """
+                UPDATE BOOKINFO
+                SET LOAN_YN = '가능', LOAN_USER = ''
+                WHERE BOOK_NAME = :1
+            """
+            cursor.execute(query_return_book, (search_book_name,))
+
+            conn.commit()  # 변경 사항 저장
+
+            QMessageBox.about(self, '반납 완료', f'"{search_book_name}" 도서가 반납되었습니다!')
+
+        # 🔹 대출 여부 자동 업데이트
+            self.updateLoanStatus()
+
+        # UI 업데이트
+            self.loadData()
+
+        except Exception as e:
+            conn.rollback()  # 오류 발생 시 롤백
+            QMessageBox.critical(self, '오류 발생', f'오류 내용: {str(e)}')
+
+        finally:
+            cursor.close()
+            conn.close()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
