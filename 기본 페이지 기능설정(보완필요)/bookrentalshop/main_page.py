@@ -7,6 +7,7 @@ import os
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
+icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")  # 아이콘 위치
 sys.path.append("C:/Users/jszxr/MyJupyter/PK_miniproject_3/기본 페이지 기능설정(보완필요)/bookrentalshop")
 from bookregistermain import BookRegisterPage
 
@@ -36,11 +37,12 @@ class MainPage(QWidget):
         pixmap = QPixmap(image_path)
         self.image_label.setPixmap(pixmap)
         self.image_label.setScaledContents(True)
+        self.image_label.setMinimumSize(1, 1)
 
         overlay_text = QLabel(self.image_label)
-        overlay_text.setText("<div style='font-size:28px; color: white; font-family: Arial; line-height:130%;'>"
-                             "대출과 반납을 간편하게,<br>Book에서</div>")
-        overlay_text.setStyleSheet("background-color: rgba(0, 0, 0, 80); padding: 16px; border-radius: 12px;")
+        # overlay_text.setText("<div style='font-size:28px; color: white; font-family: Arial; line-height:130%;'>"
+        #                      "대출과 반납을 간편하게,<br>Book에서</div>")
+        # overlay_text.setStyleSheet("background-color: rgba(0, 0, 0, 80); padding: 16px; border-radius: 12px;")
         overlay_text.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         overlay_text.setFixedWidth(400)
         overlay_text.move(40, 40)
@@ -53,6 +55,7 @@ class MainPage(QWidget):
         main_layout.addLayout(self.nav_layout)
         main_layout.addLayout(search_layout)
         main_layout.addWidget(scroll_area)
+        scroll_area.setAlignment(Qt.AlignCenter)
 
         self.setLayout(main_layout)
 
@@ -62,9 +65,30 @@ class MainPage(QWidget):
             if widget:
                 widget.setParent(None)
 
-        logo = QLabel("📗 Book")
-        logo.setFont(QFont("Arial", 16, QFont.Bold))
-        self.nav_layout.addWidget(logo)
+        # logo = QLabel("📗 Bukjeokx2")
+        # logo.setFont(QFont("Arial", 16, QFont.Bold))
+        # self.nav_layout.addWidget(logo)
+        # self.nav_layout.addStretch(1)
+
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(icon_path).scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        icon_label.setPixmap(icon_pixmap)
+        icon_label.setFixedSize(40, 40)
+        icon_label.setAlignment(Qt.AlignVCenter)
+
+        text_label = QLabel("Bukjeokx2")
+        text_label.setFont(QFont("Arial", 16, QFont.Bold))
+        text_label.setAlignment(Qt.AlignVCenter)
+
+        logo_layout = QHBoxLayout()
+        logo_layout.setSpacing(6)
+        logo_layout.addWidget(icon_label)
+        logo_layout.addWidget(text_label)
+
+        logo_widget = QWidget()
+        logo_widget.setLayout(logo_layout)
+
+        self.nav_layout.addWidget(logo_widget)
         self.nav_layout.addStretch(1)
 
         if initial:

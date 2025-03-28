@@ -8,7 +8,7 @@ from register_page import RegisterPage
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Book")
+        self.setWindowTitle("Bukjeokx2")
         self.resize(1000, 700)
 
         # QStackedWidget 생성
