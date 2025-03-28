@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from subprocess import Popen
 import sys
 import os
-import os
+import cx_Oracle
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
 icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")  # 아이콘 위치
@@ -29,6 +29,7 @@ class MainPage(QWidget):
         self.search_input.setStyleSheet("padding: 6px;")
         search_btn = QPushButton("검색")
         search_btn.setStyleSheet("background-color: #cdeac0; border: none; border-radius: 6px; padding: 6px 12px;")
+        search_btn.clicked.connect(self.search_books)
         search_layout.addWidget(self.search_input)
         search_layout.addWidget(search_btn)
 
@@ -95,7 +96,7 @@ class MainPage(QWidget):
             buttons = [("로그인", self.show_login_page)]
         else:
             buttons = [
-                ("도서", lambda: print("도서 페이지")),
+                ("도서", self.booklist),
                 ("마이페이지", lambda: print("마이페이지 이동")),
                 ("로그아웃", self.logout)
             ]
@@ -126,11 +127,52 @@ class MainPage(QWidget):
         QMessageBox.information(self, "로그아웃", "로그아웃 되었습니다.")
         self.render_navbar(initial=True)
 
+    def search_books(self):
+        book_name = self.search_input.text().strip() # 책 제목으로 검색
+        if not book_name:
+            QMessageBox.warning(self, "경고", "검색어를 입력하세요!")
+            return
+
+        try:
+            conn = cx_Oracle.connect("bookrentalshop/12345@210.119.14.73:1521/XE")
+            cursor = conn.cursor()
+
+            query = """
+                SELECT DIVISION,BOOK_NAME, AUTHOR, PUBLISHER, RELEASE_DT,BOOK_PRICE,LOAN_YN
+                FROM BOOKINFO
+                WHERE LOWER(BOOK_NAME) LIKE :book_name
+            """
+            cursor.execute(query, {"book_name": f"%{book_name.lower()}%"})
+            results = cursor.fetchall()
+
+            # 검색 결과를 SearchPage로 전달
+            book_info_page = self.stacked_widget.widget(3)  # SearchPage 가져오기
+            book_info_page.update_results(results)
+            self.stacked_widget.setCurrentIndex(3)  # SearchPage로 전환
+            
+        except cx_Oracle.DatabaseError as e:
+            QMessageBox.critical(self, "DB 오류", f"데이터베이스 연결에 실패했습니다.\n{str(e)}")
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'conn' in locals():
+                conn.close()
+
+    def show_login_page(self):
+        self.stacked_widget.setCurrentIndex(0)  # 로그인 페이지로 전환
+
+    def logout(self):
+        QMessageBox.information(self, "로그아웃", "로그아웃 되었습니다.")
+        self.render_navbar(initial=True)
+
          # 로그인 페이지의 입력 필드 초기화
         login_page = self.stacked_widget.widget(0)  # 로그인 페이지 가져오기
         login_page.clear_inputs()
 
         self.stacked_widget.setCurrentIndex(0)  # 로그인 페이지로 전환
+
+    def booklist(self):
+        self.stacked_widget.setCurrentIndex(4)  # ListPage로 전환
 
     def open_book_register(self):
         self.book_register_window = BookRegisterPage()

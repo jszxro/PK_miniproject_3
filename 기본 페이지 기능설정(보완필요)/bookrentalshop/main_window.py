@@ -3,6 +3,8 @@ import sys
 from login_page import LoginPage
 from main_page import MainPage
 from register_page import RegisterPage
+from search_page import SearchPage
+from list_page import ListPage
 
 
 class MainWindow(QMainWindow):
@@ -19,10 +21,14 @@ class MainWindow(QMainWindow):
         self.login_page = LoginPage(self.stacked_widget, self.set_user_role)
         self.main_page = MainPage(self.stacked_widget)
         self.register_page = RegisterPage(self.stacked_widget)
+        self.search_page = SearchPage(self.stacked_widget)
+        self.list_page = ListPage(self.stacked_widget)
 
         self.stacked_widget.addWidget(self.login_page)  # 인덱스 0
         self.stacked_widget.addWidget(self.main_page)   # 인덱스 1
         self.stacked_widget.addWidget(self.register_page)  # 인덱스 2
+        self.stacked_widget.addWidget(self.search_page)  # 인덱스 3
+        self.stacked_widget.addWidget(self.list_page) # 인덱스 4
 
         # 초기 페이지 설정
         self.stacked_widget.setCurrentIndex(1)  # 메인 페이지로 시작
