@@ -1,9 +1,15 @@
-from PyQt5.QtWidgets import QWidget, QFrame, QHBoxLayout, QLabel, QVBoxLayout, QLineEdit, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QWidget, QSizePolicy, QFrame, QHBoxLayout, QLabel, QVBoxLayout, QLineEdit, QPushButton, QMessageBox
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt
 import cx_Oracle
 from main_page import MainPage 
 from register_page import RegisterPage
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
+# image_path_css = image_path.replace("\\", "/")
+icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")
+icon2_path = os.path.join(BASE_DIR, "ref", "icon_image2.png")
 
 # DB 연결 설정
 DB_CONFIG = {
@@ -29,16 +35,55 @@ class LoginPage(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # 왼쪽 이미지 영역
+        # 왼쪽 영역
         image_side = QFrame()
         image_side.setStyleSheet("""
             QFrame {
-                background-image: url('ref/book_image.jpg');
+                background-color: #CDE8B4;
                 background-position: center;
                 background-repeat: no-repeat;
             }
         """)
         image_side.setMinimumWidth(500)
+
+        # 말풍선 텍스트 라벨 (픽셀 느낌)
+        speech_label = QLabel("""로그인을 해주세요 
+                                                ‧₊˚ ⭒ ˚˖°⋆ """)
+        speech_label.setFixedSize(450, 200)  # 너비 400, 높이 100 픽셀
+        speech_label.setStyleSheet("""
+            background-color: white;
+            border: 3px solid black;
+            border-radius: 12px;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 12px;
+        """)
+        speech_label.setAlignment(Qt.AlignCenter)
+        speech_label.setFont(QFont("D2Coding", 16, QFont.Bold))
+        speech_label.setAlignment(Qt.AlignCenter)
+        speech_label.setWordWrap(True)  # 👉 줄바꿈 허용!
+
+        # 아이콘 (곰돌이)
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(icon2_path).scaled(350, 350, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        icon_label.setPixmap(icon_pixmap)
+        icon_label.setFixedSize(350, 350)  # 창 크기 조절에도 이미지 고정
+        icon_label.setAlignment(Qt.AlignCenter)
+
+
+        # 말풍선 + 아이콘 수직 배치
+        speech_layout = QVBoxLayout()
+        speech_layout.setAlignment(Qt.AlignHCenter)
+        speech_layout.addWidget(speech_label)
+        speech_layout.addSpacing(10)
+        speech_layout.addWidget(icon_label)
+
+        # 좌측 전체에 추가
+        left_layout = QVBoxLayout(image_side)
+        left_layout.setContentsMargins(30, 30, 30, 30)
+        left_layout.addStretch(1)
+        left_layout.addLayout(speech_layout)
+        left_layout.addStretch(1)
 
         # 오른쪽 로그인 폼 영역
         form_container = QWidget()
