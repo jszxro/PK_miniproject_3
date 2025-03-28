@@ -36,7 +36,6 @@ class LoginPage(QWidget):
                 background-image: url('ref/book_image.jpg');
                 background-position: center;
                 background-repeat: no-repeat;
-                background-size: cover;
             }
         """)
         image_side.setMinimumWidth(500)
