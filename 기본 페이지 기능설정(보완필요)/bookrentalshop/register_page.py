@@ -25,7 +25,6 @@ class RegisterPage(QWidget):
                 background-image: url('ref/book_image.jpg');
                 background-position: center;
                 background-repeat: no-repeat;
-                background-size: cover;
             }
         """)
         image_side.setMinimumWidth(700)  # 로그인 페이지와 동일

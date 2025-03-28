@@ -3,7 +3,7 @@ from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
 from subprocess import Popen
 import sys
-sys.path.append("C:/Users/jszxr/MyJupyter/PK_miniproject_3/기본 페이지 기능설정(보완필요)/bookrentalshop")
+sys.path.append("C:\Source\PK_miniproject_3\기본 페이지 기능설정(보완필요)\bookrentalshop")
 from bookregistermain import BookRegisterPage
 
 class MainPage(QWidget):
@@ -32,6 +32,7 @@ class MainPage(QWidget):
         pixmap = QPixmap("ref/book_image.jpg")
         self.image_label.setPixmap(pixmap)
         self.image_label.setScaledContents(True)
+        self.image_label.setMinimumSize(1, 1)  # 최소 크기 설정
 
         overlay_text = QLabel(self.image_label)
         overlay_text.setText("<div style='font-size:28px; color: white; font-family: Arial; line-height:130%;'>"
@@ -44,6 +45,7 @@ class MainPage(QWidget):
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setWidget(self.image_label)
+        scroll_area.setAlignment(Qt.AlignCenter)  # 스크롤 영역 중앙 정렬
 
         main_layout = QVBoxLayout()
         main_layout.addLayout(self.nav_layout)
