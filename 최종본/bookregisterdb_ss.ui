@@ -19,7 +19,9 @@
   <property name="font">
    <font>
     <family>D2Coding</family>
-    <pointsize>11</pointsize>
+    <pointsize>10</pointsize>
+    <weight>50</weight>
+    <bold>false</bold>
    </font>
   </property>
   <property name="windowTitle">
@@ -30,9 +32,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>23</y>
+      <y>25</y>
       <width>1301</width>
-      <height>521</height>
+      <height>511</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -69,8 +71,14 @@
             <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
               <widget class="QLabel" name="label_6">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>40</height>
+                </size>
+               </property>
                <property name="text">
-                <string>  도 서   I D  : </string>
+                <string> 도서 I D : </string>
                </property>
               </widget>
              </item>
@@ -81,9 +89,6 @@
                </property>
                <property name="toolTipDuration">
                 <number>3</number>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
                </property>
                <property name="placeholderText">
                 <string>등록하실 책의 ID Number를 입력하세요.</string>
@@ -96,8 +101,14 @@
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
               <widget class="QLabel" name="label">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>40</height>
+                </size>
+               </property>
                <property name="text">
-                <string>  분       류  : </string>
+                <string> 분    류 : </string>
                </property>
               </widget>
              </item>
@@ -120,8 +131,14 @@
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
               <widget class="QLabel" name="label_2">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>40</height>
+                </size>
+               </property>
                <property name="text">
-                <string>  도 서 제 목  : </string>
+                <string> 책 제 목 : </string>
                </property>
               </widget>
              </item>
@@ -144,8 +161,14 @@
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
               <widget class="QLabel" name="label_3">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>40</height>
+                </size>
+               </property>
                <property name="text">
-                <string>  저       자  : </string>
+                <string> 저    자 : </string>
                </property>
               </widget>
              </item>
@@ -168,8 +191,14 @@
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
               <widget class="QLabel" name="label_7">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>40</height>
+                </size>
+               </property>
                <property name="text">
-                <string>  출 판 기 관  : </string>
+                <string> 출 판 사 : </string>
                </property>
               </widget>
              </item>
@@ -186,8 +215,14 @@
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
               <widget class="QLabel" name="label_4">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>40</height>
+                </size>
+               </property>
                <property name="text">
-                <string>  출 판 일 자  : </string>
+                <string> 출 판 일 : </string>
                </property>
               </widget>
              </item>
@@ -210,8 +245,14 @@
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
               <widget class="QLabel" name="label_5">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>40</height>
+                </size>
+               </property>
                <property name="text">
-                <string>  가       격  : </string>
+                <string> 가    격 : </string>
                </property>
               </widget>
              </item>
@@ -235,13 +276,19 @@
          <widget class="QWidget" name="horizontalLayoutWidget_8">
           <property name="geometry">
            <rect>
-            <x>894</x>
-            <y>443</y>
-            <width>341</width>
+            <x>859</x>
+            <y>440</y>
+            <width>401</width>
             <height>41</height>
            </rect>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,1,1,1">
+           <property name="spacing">
+            <number>7</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
            <item>
             <widget class="QPushButton" name="btn_add">
              <property name="sizePolicy">
@@ -251,7 +298,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>등     록</string>
+              <string>등   록</string>
              </property>
             </widget>
            </item>
@@ -264,7 +311,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>수     정</string>
+              <string>수   정</string>
              </property>
             </widget>
            </item>
@@ -277,7 +324,25 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>삭     제</string>
+              <string>삭   제</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_clear">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>  초 기 화  </string>
              </property>
             </widget>
            </item>

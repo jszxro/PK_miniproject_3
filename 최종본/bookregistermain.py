@@ -30,9 +30,9 @@ class MainWindow(QMainWindow):
 
 
         # 버튼에 아이콘 추가
-        self.btn_add.setIcon(QIcon('plus.png'))
-        self.btn_mod.setIcon(QIcon('edit.png'))
-        self.btn_del.setIcon(QIcon('minus.png'))
+        #self.btn_add.setIcon(QIcon('plus.png'))
+        #self.btn_mod.setIcon(QIcon('edit.png'))
+        #self.btn_del.setIcon(QIcon('minus.png'))
     
     # 버튼 시그널(이벤트) 추가
         self.btn_add.clicked.connect(self.btnAddClick)
