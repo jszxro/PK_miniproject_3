@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 import cx_Oracle as oci
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # from PyQt5.QtCore import QSize
 
 # DB 연결 정보
@@ -14,14 +16,24 @@ DB_INFO = {
     "password": "12345"
 }
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
+class bookQT(QMainWindow):
+    def __init__(self, book=None):  # 수정: book 인수를 받을 수 있도록 변경
+        super(QMainWindow, self).__init__()
         self.initUI()
         self.loadData()
+        if book:
+            self.populate_fields(book)  # 전달받은 책 데이터를 필드에 채우기
+
+    def populate_fields(self, book):
+        """전달받은 책 데이터를 입력 필드에 채우기"""
+        self.input_std_name.setText(book[0])  # 책 제목
+        self.input_std_author.setText(book[1])  # 저자
+        self.input_std_pub.setText(book[2])  # 출판사
 
     def initUI(self):
-        uic.loadUi('book_qt_3.ui', self)
+        basedir = os.path.dirname(os.path.abspath(__file__))
+        ui_path = os.path.join(basedir, 'book_qt_3.ui')
+        uic.loadUi(ui_path, self)
         self.setWindowTitle('도서대출 예약 반납 서비스')
         self.statusbar.showMessage('도서대출 예약 반납 service')
 
@@ -87,7 +99,6 @@ class MainWindow(QMainWindow):
         conn.close()
 
     def loadCustomerData(self):
-        """고객 정보를 불러와서 테이블에 표시"""
         conn = self.connectDB()
         cursor = conn.cursor()
         query = "SELECT CST_NAMES FROM CUSTOMERINFO"
@@ -372,5 +383,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    win = MainWindow()
-    app.exec_()
+    window = bookQT()
+    window.show()
+    sys.exit(app.exec_())

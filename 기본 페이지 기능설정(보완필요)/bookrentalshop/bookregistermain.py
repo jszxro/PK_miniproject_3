@@ -264,8 +264,8 @@ class BookRegisterPage(QMainWindow):
             # 상태바에 메세지 추가
             self.statusbar.showMessage(f'{basic_msg} | 도서 정보 삭제 완료')
 
-    def btnClearClick(self):
-        self.clearInput()
+    def btnClearClick(self): # 초기화 버튼 클릭 시 시그널 처리 함수
+        self.clearInput() # 인풋 위젯 초기화 함수 호출
 
 
     # 테이블 위젯 데이터와 연관해서 화면 설정 !!

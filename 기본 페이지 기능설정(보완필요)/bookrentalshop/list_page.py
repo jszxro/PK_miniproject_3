@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTableWid
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHeaderView  # QHeaderView 추가
+from book_qt_3 import bookQT  # 수정: 올바른 클래스 이름으로 임포트
 import cx_Oracle as oci # cx_Oracle 추가
 
 class ListPage(QWidget):
@@ -31,13 +32,12 @@ class ListPage(QWidget):
         self.result_table.setEditTriggers(QTableWidget.NoEditTriggers)  # 셀 수정 비활성화
         self.result_table.setStyleSheet("""
             QTableWidget::item {
-                padding: 15px;  /* 셀 내부 간격 조정 */
+                padding: 5px;  /* 셀 내부 간격 조정 */
             }
             QTableWidget::item:selected {
                 background-color: #D3E4CD;  /* 선택된 셀의 배경색 */
             }
         """) # 테이블 스타일 설정
-        self.result_table.cellClicked.connect(lambda row, col: self.show_book_details(self.book_data[row]))  # 셀 클릭 시 책 상세 정보 표시
         layout.addWidget(self.result_table)
 
         # 행 높이 조정
@@ -128,6 +128,22 @@ class ListPage(QWidget):
             for col_index, value in enumerate(row_data[1:], start=1):
                 self.result_table.setItem(row_index, col_index, QTableWidgetItem(str(value)))
 
+            # "책 상세보기" 버튼 추가
+            detail_button = QPushButton("책 정보")
+            detail_button.setStyleSheet("""
+                QPushButton {
+                    padding: 10px;
+                    background-color: #CDE8B4;
+                    border-radius: 8px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background-color: #b5ddb0;
+                }
+            """)
+            detail_button.clicked.connect(lambda _, book=row_data: self.open_book_qt(book[2]))  # 책 이름 전달
+            self.result_table.setCellWidget(row_index, 7, detail_button)  # "책 상세보기" 버튼 추가
+
     def updatePaginationButtons(self):  # 페이지네이션 버튼 업데이트
         total_pages = (self.total_items + self.items_per_page - 1) // self.items_per_page
         self.page_label.setText(f"페이지 {self.current_page} / {total_pages}")
@@ -162,8 +178,33 @@ class ListPage(QWidget):
             self.updateTable()
             self.updatePaginationButtons()
 
-    def show_book_details(self, book):  # 책 상세 정보 표시
-        QMessageBox.information(self, "책 상세 정보", f"책 이름: {book[2]}\n저자: {book[3]}\n출판사: {book[4]}\n출간일: {book[5]}\n가격: {book[6]} 원")
+    def open_book_qt(self, book_name):
+        """책 정보 버튼 클릭 시 DB에서 책 정보를 조회하고 bookQT 창에 전달"""
+        try:
+            conn = oci.connect("bookrentalshop/12345@210.119.14.73:1521/XE")
+            cursor = conn.cursor()
+
+            query = """
+                SELECT BOOK_NAME, AUTHOR, PUBLISHER
+                FROM BOOKINFO
+                WHERE BOOK_NAME = :book_name
+            """
+            cursor.execute(query, {"book_name": book_name})
+            book_data = cursor.fetchone()
+
+            if book_data:
+                self.user_register_window = bookQT(book_data)  # 책 정보를 전달
+                self.user_register_window.show()
+            else:
+                QMessageBox.warning(self, "경고", "책 정보를 찾을 수 없습니다.")
+
+        except oci.DatabaseError as e:
+            QMessageBox.critical(self, "DB 오류", f"데이터베이스 연결에 실패했습니다.\n{str(e)}")
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'conn' in locals():
+                conn.close()
 
     def go_back(self):  # 뒤로가기
         if self.current_page > 1:
