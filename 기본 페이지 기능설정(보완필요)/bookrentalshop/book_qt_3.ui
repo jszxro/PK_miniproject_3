@@ -37,7 +37,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>도서 상세 정보</string>
+          <string>도서 관리 시스템</string>
          </property>
          <widget class="QWidget" name="verticalLayoutWidget_2">
           <property name="geometry">
@@ -49,6 +49,24 @@
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>대출자명:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="input_std_username">
+               <property name="placeholderText">
+                <string>대출자명 입력</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
