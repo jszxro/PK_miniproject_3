@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from subprocess import Popen
 import sys
 import os
-import os
+from config import DB_CONFIG
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
 icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")  # 아이콘 위치

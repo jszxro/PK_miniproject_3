@@ -3,6 +3,7 @@ import sys
 from login_page import LoginPage
 from main_page import MainPage
 from register_page import RegisterPage
+from config import DB_CONFIG
 
 
 class MainWindow(QMainWindow):
