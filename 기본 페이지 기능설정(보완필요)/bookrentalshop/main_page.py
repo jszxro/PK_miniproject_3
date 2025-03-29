@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 from subprocess import Popen
 import sys
 import os
+from config import DB_CONFIG
 import cx_Oracle
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
