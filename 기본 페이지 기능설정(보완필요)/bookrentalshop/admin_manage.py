@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 import cx_Oracle as oci
+import os
 # from PyQt5.QtCore import QSize
 
 # DB 연결 정보
@@ -29,7 +30,9 @@ class CustomerManager(QMainWindow):
         # self.loadData()
 
     def initUI(self):
-        uic.loadUi('customer_ui.ui', self)
+        basedir = os.path.dirname(os.path.abspath(__file__))
+        ui_path = os.path.join(basedir, UI_FILE)
+        uic.loadUi(ui_path, self)  # UI 로드
         self.setWindowTitle('관리자 유저 관리 페이지')
         self.statusbar.showMessage('관리자 유저 관리 페이지')
     # def __init__(self):

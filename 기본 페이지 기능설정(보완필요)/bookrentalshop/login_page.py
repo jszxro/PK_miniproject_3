@@ -124,6 +124,22 @@ class LoginPage(QWidget):
         """)
         login_btn.clicked.connect(self.verify_credentials)
 
+        # 홈으로 가기 버튼
+        back_button = QPushButton("홈으로 가기")
+        back_button.setFixedWidth(600)  # 로그인 버튼과 동일한 너비 설정
+        back_button.setStyleSheet("""
+            QPushButton {
+                padding: 15px;
+                border-radius: 10px;
+                background-color: #FFCCCC;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #f2a6a6;
+            }
+        """)
+        back_button.clicked.connect(self.go_home)  # 버튼 클릭 시 메인 페이지로 이동
+
         register_label = QLabel("<a href='#'>회원가입</a>  |  ID/PW 찾기  |  관리자 로그인")
         register_label.setStyleSheet("color: gray; font-size: 14px")
         register_label.setAlignment(Qt.AlignCenter)
@@ -134,6 +150,7 @@ class LoginPage(QWidget):
         form_layout.addWidget(self.email_input)
         form_layout.addWidget(self.password_input)
         form_layout.addWidget(login_btn)
+        form_layout.addWidget(back_button)  # 로그인 버튼 아래에 홈으로 가기 버튼 추가
         form_layout.addWidget(register_label)
 
         # 전체 배경색
@@ -185,6 +202,7 @@ class LoginPage(QWidget):
                 connection.close()
 
     def go_home(self):
+        """홈으로 가기 버튼 클릭 시 메인 페이지로 이동"""
         self.stacked_widget.setCurrentIndex(1)
 
     def show_register_page(self):

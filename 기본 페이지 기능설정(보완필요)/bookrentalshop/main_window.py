@@ -5,6 +5,8 @@ from main_page import MainPage
 from register_page import RegisterPage
 from search_page import SearchPage
 from list_page import ListPage
+from PyQt5.QtGui import QIcon
+
 
 
 class MainWindow(QMainWindow):

@@ -10,6 +10,7 @@ image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
 icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")  # 아이콘 위치
 sys.path.append("C:/Users/jszxr/MyJupyter/PK_miniproject_3/기본 페이지 기능설정(보완필요)/bookrentalshop")
 from bookregistermain import BookRegisterPage
+from admin_manage import CustomerManager
 
 class MainPage(QWidget):
     def __init__(self, stacked_widget, cst_role=None):
@@ -97,11 +98,15 @@ class MainPage(QWidget):
         else:
             buttons = [
                 ("도서", self.booklist),
-                ("마이페이지", lambda: print("마이페이지 이동")),
                 ("로그아웃", self.logout)
             ]
             if self.cst_role == 'admin':
                 buttons.insert(1, ("관리자용 도서 관리", self.open_book_register))
+
+            if self.cst_role == 'admin':
+                buttons.insert(2, ("관리자용 유저 관리", self.open_user_register))
+            if self.cst_role == 'user':
+                buttons.insert(1, ("마이페이지", self.open_my_page)) 
 
         for text, slot in buttons:
             btn = QPushButton(text)
@@ -168,7 +173,6 @@ class MainPage(QWidget):
          # 로그인 페이지의 입력 필드 초기화
         login_page = self.stacked_widget.widget(0)  # 로그인 페이지 가져오기
         login_page.clear_inputs()
-
         self.stacked_widget.setCurrentIndex(0)  # 로그인 페이지로 전환
 
     def booklist(self):
@@ -177,3 +181,10 @@ class MainPage(QWidget):
     def open_book_register(self):
         self.book_register_window = BookRegisterPage()
         self.book_register_window.show()
+
+    def open_user_register(self):
+        self.user_register_window = CustomerManager()
+        self.user_register_window.show()
+
+    def open_my_page(self):
+        print("마이페이지 이동")
