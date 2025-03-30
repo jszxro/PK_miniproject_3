@@ -5,6 +5,9 @@ from subprocess import Popen
 import sys
 import os
 import cx_Oracle as oci  # cx_Oracle 추가
+from config import DB_CONFIG
+import cx_Oracle
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
 icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")  # 아이콘 위치
@@ -18,6 +21,11 @@ class MainPage(QWidget):
         super().__init__()
         self.stacked_widget = stacked_widget 
         self.cst_role = cst_role # 사용자 역할 (admin, user 등)
+        self.user_email = None
+
+        from search_page import SearchPage
+        self.search_page = SearchPage(self.stacked_widget, user_email=self.user_email)
+
         self.initUI()
 
     def initUI(self):
@@ -187,5 +195,20 @@ class MainPage(QWidget):
         self.user_register_window = CustomerManager() # 유저 관리 페이지
         self.user_register_window.show()
 
-    def open_my_page(self): # 마이페이지 이동
-        print("마이페이지 이동") # 실제 마이페이지 구현 필요
+    # def open_my_page(self):
+    #     # 로그인한 사용자의 이메일이 필요해요!
+    #     login_page = self.stacked_widget.widget(0)
+    #     user_email = login_page.email_input.text().strip()
+
+    #     # 이미 추가된 마이페이지 위젯을 찾거나 새로 생성
+    #     from mypage import MyPage  # MyPage import
+
+    #     self.mypage = MyPage(user_email)
+    #     self.stacked_widget.addWidget(self.mypage)
+    #     self.stacked_widget.setCurrentIndex(self.stacked_widget.indexOf(self.mypage))
+
+    def open_my_page(self):
+        if hasattr(self, 'mypage_index'):
+            self.stacked_widget.setCurrentIndex(self.mypage_index)
+        else:
+            QMessageBox.warning(self, "오류", "마이페이지를 불러올 수 없습니다.")

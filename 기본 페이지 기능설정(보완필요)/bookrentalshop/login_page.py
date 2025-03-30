@@ -11,14 +11,15 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # image_path_css = image_path.replace("\\", "/")
 icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")
 icon2_path = os.path.join(BASE_DIR, "ref", "icon_image2.png")
-
+import cx_Oracle
 # DB 연결 설정
-# DB_CONFIG = {
-#     'user': 'bookrentalshop',
-#     'password': '12345',
-#     'dsn': cx_Oracle.makedsn('210.119.14.73', 1521, service_name='XE')
-# }
+DB_CONFIG = {
+    'user': 'bookrentalshop',
+    'password': '12345',
+    'dsn': cx_Oracle.makedsn('210.119.14.73', 1521, service_name='XE')
+}
 
+# from config import DB_CONFIG
 
 class LoginPage(QWidget):
     def __init__(self, stacked_widget, set_cst_role):
@@ -185,6 +186,18 @@ class LoginPage(QWidget):
                 self.cst_name = result[0]  # CST_NAME 저장
                 role = result[1]
                 self.set_cst_role(role)
+
+                main_page = self.stacked_widget.widget(1)
+                main_page.render_navbar(initial=False)
+
+                from mypage import MyPage
+                mypage = MyPage(email)  # 로그인 이메일 그대로 사용
+                self.stacked_widget.addWidget(mypage)
+
+                # 마이페이지 인덱스를 main_page에 전달 (선택 사항)
+                main_page.mypage_index = self.stacked_widget.indexOf(mypage)
+                main_page.user_email = email  # 사용자 이메일 저장
+                
                 if role == 'admin':
                     QMessageBox.information(self, "관리자 로그인", "관리자님, 환영합니다!")
                 else:

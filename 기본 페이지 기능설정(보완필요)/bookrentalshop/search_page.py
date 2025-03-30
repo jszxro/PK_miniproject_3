@@ -9,10 +9,11 @@ import requests  # URL에서 이미지를 다운로드하기 위해 추가
 from io import BytesIO  # 이미지 데이터를 메모리에서 처리하기 위해 추가
 
 class SearchPage(QWidget):
-    def __init__(self, stacked_widget):
+    def __init__(self, stacked_widget, user_email=None):
         super().__init__()
         self.stacked_widget = stacked_widget
         self.logged_in_user = None  # 로그인한 유저 이름 저장
+        self.user_email = user_email
         self.initUI()
 
     def initUI(self):
@@ -146,6 +147,7 @@ class SearchPage(QWidget):
                 self.user_register_window = bookQT(book_data)
                 if self.logged_in_user:  # 로그인한 유저 이름이 있으면 전달
                     self.user_register_window.input_std_username.setText(self.logged_in_user)
+                self.user_register_window = bookQT(book_data, user_email=self.user_email)  # 책 정보를 전달
                 self.user_register_window.show()
             else:
                 QMessageBox.warning(self, "경고", f"책 정보를 찾을 수 없습니다: {book_name}")
