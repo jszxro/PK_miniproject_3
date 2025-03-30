@@ -1,9 +1,12 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTableWidget, QTableWidgetItem, QHBoxLayout, QTableWidgetItem, QMessageBox
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHeaderView  # QHeaderView 추가
+from PyQt5.QtWidgets import QHeaderView, QLabel  # QHeaderView, QLabel 추가
 from book_qt_3 import bookQT  # 수정: 올바른 클래스 이름으로 임포트
+from config import DB_CONFIG  # DB_CONFIG 임포트
 import cx_Oracle as oci # cx_Oracle 추가
+import requests  # URL에서 이미지를 다운로드하기 위해 추가
+from io import BytesIO  # 이미지 데이터를 메모리에서 처리하기 위해 추가
 
 class ListPage(QWidget):
     def __init__(self, stacked_widget):
@@ -85,12 +88,14 @@ class ListPage(QWidget):
         layout.addLayout(button_layout)
         self.setLayout(layout)
 
-    def loadBooksFromDB(self):  # DB에서 책 데이터 로드
+
+    # DB에서 책 데이터 로드
+    def loadBooksFromDB(self):  
         try:
-            conn = oci.connect('bookrentalshop/12345@210.119.14.73:1521/XE')
+            conn = oci.connect(**DB_CONFIG)
             cursor = conn.cursor()
             query = '''
-                SELECT BOOK_ID, DIVISION, BOOK_NAME, AUTHOR, PUBLISHER, TO_CHAR(RELEASE_DT, 'YYYY-MM-DD'), BOOK_PRICE
+                SELECT BOOK_IMG, DIVISION, BOOK_NAME, AUTHOR, PUBLISHER, TO_CHAR(RELEASE_DT, 'YYYY-MM-DD'), BOOK_PRICE
                 FROM BOOKINFO
                 ORDER BY BOOK_ID
             '''
@@ -106,45 +111,77 @@ class ListPage(QWidget):
             cursor.close()
             conn.close()
 
-    def updateTable(self):  # 테이블 업데이트
+
+    # 테이블 업데이트
+    def updateTable(self):
         start_index = (self.current_page - 1) * self.items_per_page
         end_index = start_index + self.items_per_page
         page_data = self.book_data[start_index:end_index]
 
         self.result_table.setRowCount(len(page_data))
+        self.result_table.verticalHeader().setDefaultSectionSize(120)  # 셀 높이를 120으로 설정
         for row_index, row_data in enumerate(page_data):
+
+            # 이미지 URL을 가져와서 QPixmap으로 변환
             # 이미지 셀 추가
-            image_path = f"images/{row_data[2]}.jpg"  # 책 이름을 기반으로 이미지 경로 설정
-            pixmap = QPixmap(image_path)
-            if not pixmap.isNull():
-                icon = QIcon(pixmap)
-                image_item = QTableWidgetItem()
-                image_item.setIcon(icon)
-                self.result_table.setItem(row_index, 0, image_item)
-            else:
-                self.result_table.setItem(row_index, 0, QTableWidgetItem("이미지 없음"))
+            image_url = row_data[0]  # book_img 컬럼의 URL 사용
+            try:
+                response = requests.get(image_url)
+                response.raise_for_status()
+                pixmap = QPixmap()
+                pixmap.loadFromData(BytesIO(response.content).read())
+                if not pixmap.isNull():
+                    pixmap = pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)  # 이미지 크기 조정
+                    image_label = QLabel()  # QLabel 사용
+                    image_label.setPixmap(pixmap)
+                    image_label.setAlignment(Qt.AlignCenter)  # 가운데 정렬
+                    self.result_table.setCellWidget(row_index, 0, image_label)
+                else:
+                    no_image_label = QLabel("이미지 없음")
+                    no_image_label.setAlignment(Qt.AlignCenter)  # 가운데 정렬
+                    self.result_table.setCellWidget(row_index, 0, no_image_label)
+            except Exception:
+                no_image_label = QLabel("이미지 없음")
+                no_image_label.setAlignment(Qt.AlignCenter)  # 가운데 정렬
+                self.result_table.setCellWidget(row_index, 0, no_image_label)
+
 
             # 나머지 데이터 셀 추가
             for col_index, value in enumerate(row_data[1:], start=1):
-                self.result_table.setItem(row_index, col_index, QTableWidgetItem(str(value)))
+                item = QTableWidgetItem(str(value))
+                item.setTextAlignment(Qt.AlignCenter)  # 셀 내용 가운데 정렬
+                self.result_table.setItem(row_index, col_index, item)
+
 
             # "책 상세보기" 버튼 추가
             detail_button = QPushButton("책 정보")
             detail_button.setStyleSheet("""
                 QPushButton {
-                    padding: 10px;
+                    padding: 5px;
                     background-color: #CDE8B4;
-                    border-radius: 8px;
+                    border-radius: 5px;
                     font-weight: bold;
                 }
                 QPushButton:hover {
                     background-color: #b5ddb0;
                 }
             """)
+        
+            detail_button.setFixedSize(100, 40)  # 버튼 크기 조정
             detail_button.clicked.connect(lambda _, book=row_data: self.open_book_qt(book[2]))  # 책 이름 전달
-            self.result_table.setCellWidget(row_index, 7, detail_button)  # "책 상세보기" 버튼 추가
+            
+             # 버튼을 가운데 정렬
+            button_layout = QHBoxLayout()
+            button_layout.setAlignment(Qt.AlignCenter)
+            button_layout.addWidget(detail_button)
+            button_widget = QWidget()
+            button_widget.setLayout(button_layout)
 
-    def updatePaginationButtons(self):  # 페이지네이션 버튼 업데이트
+            self.result_table.setCellWidget(row_index, 7, button_widget)  # "책 상세보기" 버튼 추가
+
+
+    # 페이지네이션 버튼 업데이트
+    def updatePaginationButtons(self):
         total_pages = (self.total_items + self.items_per_page - 1) // self.items_per_page
         self.page_label.setText(f"페이지 {self.current_page} / {total_pages}")
         self.first_button.setEnabled(self.current_page > 1)
@@ -152,36 +189,42 @@ class ListPage(QWidget):
         self.next_button.setEnabled(self.current_page < total_pages)
         self.last_button.setEnabled(self.current_page < total_pages)
 
-    def firstPage(self):  # 처음 페이지로 이동
+        
+    # 처음 페이지로 이동
+    def firstPage(self):
         if self.current_page > 1:
             self.current_page = 1
             self.updateTable()
             self.updatePaginationButtons()
 
-    def lastPage(self):  # 마지막 페이지로 이동
+    # 마지막 페이지로 이동
+    def lastPage(self):  
         total_pages = (self.total_items + self.items_per_page - 1) // self.items_per_page
         if self.current_page < total_pages:
             self.current_page = total_pages
             self.updateTable()
             self.updatePaginationButtons()
 
-    def prevPage(self): # 이전 페이지로 이동
+    # 이전 페이지로 이동
+    def prevPage(self):
         if self.current_page > 1:
             self.current_page -= 1
             self.updateTable()
             self.updatePaginationButtons()
 
-    def nextPage(self): # 다음 페이지로 이동
+    # 다음 페이지로 이동
+    def nextPage(self):
         total_pages = (self.total_items + self.items_per_page - 1) // self.items_per_page
         if self.current_page < total_pages:
             self.current_page += 1
             self.updateTable()
             self.updatePaginationButtons()
 
-    def open_book_qt(self, book_name):
-        """책 정보 버튼 클릭 시 DB에서 책 정보를 조회하고 bookQT 창에 전달"""
+
+    # 책 상세보기 버튼 클릭 시 DB에서 책 정보를 조회하고 bookQT 창에 전달
+    def open_book_qt(self, book_name): 
         try:
-            conn = oci.connect("bookrentalshop/12345@210.119.14.73:1521/XE")
+            conn = oci.connect(**DB_CONFIG)
             cursor = conn.cursor()
 
             query = """
@@ -206,7 +249,9 @@ class ListPage(QWidget):
             if 'conn' in locals():
                 conn.close()
 
-    def go_back(self):  # 뒤로가기
+
+    # 뒤로가기 버튼 클릭 시 메인 페이지로 이동
+    def go_back(self): 
         if self.current_page > 1:
             self.current_page = 1
             self.updateTable()

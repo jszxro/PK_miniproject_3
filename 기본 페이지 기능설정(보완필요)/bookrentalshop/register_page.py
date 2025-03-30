@@ -4,7 +4,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt
-import cx_Oracle
+from config import DB_CONFIG  # DB_CONFIG 임포트
+import cx_Oracle as oci  # cx_Oracle 추가
 import re
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -169,7 +170,7 @@ class RegisterPage(QWidget):
             return
 
         try:
-            conn = cx_Oracle.connect("bookrentalshop/12345@210.119.14.73:1521/XE")
+            conn = oci.connect(**DB_CONFIG)
             cursor = conn.cursor()
 
             cursor.execute("SELECT NVL(MAX(CST_ID), 0) + 1 FROM CUSTOMERINFO")
@@ -193,7 +194,7 @@ class RegisterPage(QWidget):
 
     def is_email_exists(self, email):
         try:
-            conn = cx_Oracle.connect("bookrentalshop/12345@210.119.14.73:1521/XE")
+            conn = oci.connect(**DB_CONFIG)
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM CUSTOMERINFO WHERE CST_EMAIL = :1", (email,))
             return cursor.fetchone()[0] > 0

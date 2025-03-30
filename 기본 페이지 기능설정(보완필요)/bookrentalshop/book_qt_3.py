@@ -2,19 +2,21 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
+from config import DB_CONFIG  # DB_CONFIG 임포트
 import cx_Oracle as oci
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # from PyQt5.QtCore import QSize
 
 # DB 연결 정보
-DB_INFO = {
-    "sid": "XE",
-    "host": "210.119.14.73",
-    "port": 1521,
-    "username": "bookrentalshop",
-    "password": "12345"
-}
+# DB_INFO = {
+#     "sid": "XE",
+#     "host": "210.119.14.73",
+#     "port": 1521,
+#     "username": "bookrentalshop",
+#     "password": "12345"
+# }
+
 
 class bookQT(QMainWindow):
     def __init__(self, book=None):  # 수정: book 인수를 받을 수 있도록 변경
@@ -24,8 +26,8 @@ class bookQT(QMainWindow):
         if book:
             self.populate_fields(book)  # 전달받은 책 데이터를 필드에 채우기
 
+    # 전달받은 책 데이터를 필드에 채우는 메서드
     def populate_fields(self, book):
-        """전달받은 책 데이터를 입력 필드에 채우기"""
         self.input_std_name.setText(book[0])  # 책 제목
         self.input_std_author.setText(book[1])  # 저자
         self.input_std_pub.setText(book[2])  # 출판사
@@ -75,7 +77,7 @@ class bookQT(QMainWindow):
 
     
     def connectDB(self):
-        return oci.connect(f"{DB_INFO['username']}/{DB_INFO['password']}@{DB_INFO['host']}:{DB_INFO['port']}/{DB_INFO['sid']}")
+        return oci.connect(**DB_CONFIG)
     
     def loadData(self):
         conn = self.connectDB()
@@ -89,7 +91,7 @@ class bookQT(QMainWindow):
         for i, row in enumerate(books):
             for j, col in enumerate(row):
                 if j == 3:  # 🔹 대출 여부 변환
-                    loan_status = "불가능" if col != "가능" else "불가능"
+                    loan_status = "가능" if col != "불가능" else "가능"
                     self.tblbook.setItem(i, j, QTableWidgetItem(loan_status))
                 else:
                     self.tblbook.setItem(i, j, QTableWidgetItem(str(col)))

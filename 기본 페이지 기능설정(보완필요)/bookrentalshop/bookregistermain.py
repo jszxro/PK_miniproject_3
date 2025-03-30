@@ -3,16 +3,17 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import QtGui, QtWidgets, uic
+from config import DB_CONFIG  # DB_CONFIG 임포트
 
 # Oracle 모듈 
 import cx_Oracle as oci
 
-# DB 연결 설정
-sid = 'XE'
-host = '210.119.14.73'  # 외부에서 접속할 경우 변경
-port = 1521
-username = 'bookrentalshop'
-password = '12345'
+# # DB 연결 설정
+# sid = 'XE'
+# host = '210.119.14.73'  # 외부에서 접속할 경우 변경
+# port = 1521
+# username = 'bookrentalshop'
+# password = '12345'
 basic_msg = '도서 등록 / 수정 (관리자용) v1.0'
 
 class BookRegisterPage(QMainWindow): 
@@ -126,6 +127,7 @@ class BookRegisterPage(QMainWindow):
         self.input_book_pubs.clear()
         self.input_book_date.clear()
         self.input_book_cost.clear()
+        self.input_book_img.clear()
 
     # 테이블위젯 더블클릭 시그널처리 함수 !
     def tblBooksDoubleClick(self):
@@ -137,6 +139,7 @@ class BookRegisterPage(QMainWindow):
         publisher = self.tblBooks.item(selected, 4).text()
         release_dt = self.tblBooks.item(selected, 5).text()
         book_price = self.tblBooks.item(selected, 6).text()
+        book_img = self.tblBooks.item(selected, 7).text()
 
         self.input_book_idno.setText(book_id)
         self.input_book_type.setText(division)
@@ -145,6 +148,7 @@ class BookRegisterPage(QMainWindow):
         self.input_book_pubs.setText(publisher)
         self.input_book_date.setText(release_dt)
         self.input_book_cost.setText(book_price)
+        self.input_book_img.setText(book_img)
 
         # 상태바에 메세지 추가
         self.statusbar.showMessage(f'{basic_msg} | 도서 정보 확인')
@@ -160,6 +164,7 @@ class BookRegisterPage(QMainWindow):
         publisher = self.input_book_pubs.text()  
         release_dt = self.input_book_date.text()
         book_price = self.input_book_cost.text()
+        book_img = self.input_book_img.text()
 
         # 입력 검증
         if division == '' or book_name == '':
@@ -167,7 +172,7 @@ class BookRegisterPage(QMainWindow):
             return
 
         try:
-            conn = oci.connect(f'{username}/{password}@{host}:{port}/{sid}')
+            conn = oci.connect(**DB_CONFIG)
             cursor = conn.cursor()
 
             # 중복 확인
@@ -189,7 +194,8 @@ class BookRegisterPage(QMainWindow):
                 'v_author': author,
                 'v_publisher': publisher,
                 'v_release_dt': release_dt,
-                'v_book_price': book_price
+                'v_book_price': book_price,
+                'v_book_price': book_img
             })
 
             conn.commit()
@@ -216,13 +222,14 @@ class BookRegisterPage(QMainWindow):
         publisher = self.input_book_pubs.text()  
         release_dt= self.input_book_date.text()
         book_price = self.input_book_cost.text()
+        book_img = self.input_book_img.text()
 
         if book_id == '' or book_name == '' or division == '':
             QMessageBox.warning(self, '경고','도서 ID, 도서제목 또는 분류를 반드시 입력해 주세요 !')
             return         # 함수를 탈출!!!!!! (위기탈출 넘버원.)
         else:
             print('도서 정보를 수정합니다.')
-            values = (book_id, division, book_name, author, publisher, release_dt,  book_price)
+            values = (book_id, division, book_name, author, publisher, release_dt,  book_price, book_img)
 
             result = self.modData(values)
             print(f"modData 실행결과 : {result}")  # 결과확인용!!!!
@@ -273,14 +280,14 @@ class BookRegisterPage(QMainWindow):
     def makeTable(self, lst_books):
         self.tblBooks.setSelectionMode(QAbstractItemView.SingleSelection) # 단일row 선택모드
         self.tblBooks.setEditTriggers(QAbstractItemView.NoEditTriggers) #컬럼수정금지모드
-        self.tblBooks.setColumnCount(7)
+        self.tblBooks.setColumnCount(8)
         self.tblBooks.setRowCount(len(lst_books))  # 커서에 들어있는 데이터의 길이만큼 row 생성 !!
-        self.tblBooks.setHorizontalHeaderLabels(['도서 ID','분류','도서제목','저자','출판기관', '출판일자','가격'])
+        self.tblBooks.setHorizontalHeaderLabels(['도서 ID','분류','도서제목','저자','출판기관', '출판일자','가격','이미지 주소'])
 
         # 전달받은 cursor를 반복문(for문)으로 테이블위젯에 적용하는 작업
         ## 테이블 위젯은 문자로 된 단어만 받으므로 숫자는 전부 str 작업을 해줘야 함!!! 꼭 기억하기 !! (20250326)
         # i = 0
-        for i, (book_id, division, book_name, author, publisher, release_dt, book_price) in enumerate(lst_books):
+        for i, (book_id, division, book_name, author, publisher, release_dt, book_price,book_img) in enumerate(lst_books):
             self.tblBooks.setItem(i,0,QTableWidgetItem(str(book_id)))
             self.tblBooks.setItem(i,1,QTableWidgetItem(division))
             self.tblBooks.setItem(i,2,QTableWidgetItem(book_name))
@@ -288,18 +295,19 @@ class BookRegisterPage(QMainWindow):
             self.tblBooks.setItem(i,4,QTableWidgetItem(publisher))
             self.tblBooks.setItem(i,5,QTableWidgetItem(str(release_dt)))
             self.tblBooks.setItem(i,6,QTableWidgetItem(str(book_price)))
+            self.tblBooks.setItem(i,7,QTableWidgetItem(str(book_img)))
             # i+=1
 
     # R(SELECT)
     def loadData(self):
         # DB연결
         try:
-            conn = oci.connect(f'{username}/{password}@{host}:{port}/{sid}')
+            conn = oci.connect(**DB_CONFIG)
             cursor = conn.cursor()
 
-            query = '''SELECT BOOK_ID, DIVISION, BOOK_NAME, AUTHOR, PUBLISHER, RELEASE_DT, BOOK_PRICE
+            query = '''SELECT BOOK_ID, DIVISION, BOOK_NAME, AUTHOR, PUBLISHER, RELEASE_DT, BOOK_PRICE, BOOK_IMG
                          FROM BOOKINFO
-                         ORDER BY DIVISION ASC''' # DIVISION을 기준으로 오름차순 정렬
+                         ORDER BY BOOK_ID''' # DIVISION을 기준으로 오름차순 정렬
             cursor.execute(query)
 
             lst_books = []  # 리스트 생성
@@ -318,7 +326,7 @@ class BookRegisterPage(QMainWindow):
     # C(INSERT)
     def addData(self, tuples):
         isSucceed = False # 성공여부 플래그 변수
-        conn = oci.connect(f'{username}/{password}@{host}:{port}/{sid}')
+        conn = oci.connect(**DB_CONFIG)
         cursor = conn.cursor()
 
         try:
@@ -326,8 +334,8 @@ class BookRegisterPage(QMainWindow):
 
             # 쿼리 만들기
             query = '''
-                    INSERT INTO BOOKRENTALSHOP.BOOKINFO (book_id, division, book_name, author, publisher, release_dt,  book_price)
-                    VALUES (BKINFO.NEXTVAL, :v_division, :v_book_name, :v_author, :v_publisher, TO_DATE(:v_release_dt, 'YYYY-MM-DD'), :v_book_price)
+                    INSERT INTO BOOKRENTALSHOP.BOOKINFO (book_id, division, book_name, author, publisher, release_dt,  book_price, book_img)
+                    VALUES (BKINFO.NEXTVAL, :v_division, :v_book_name, :v_author, :v_publisher, TO_DATE(:v_release_dt, 'YYYY-MM-DD'), :v_book_price, :v_book_img)
                     '''
             
             ## GPT의 도움 .... 
@@ -337,7 +345,8 @@ class BookRegisterPage(QMainWindow):
             'v_author': tuples[3],
             'v_publisher': tuples[4],
             'v_release_dt': tuples[5],
-            'v_book_price': tuples[6]
+            'v_book_price': tuples[6],
+            'v_book_img': tuples[7]
         })
 
             conn.commit()   # DB commit과 동일기능이래 ~
@@ -360,7 +369,7 @@ class BookRegisterPage(QMainWindow):
     # U(Update)
     def modData(self, tuples):
         isSucceed = False
-        conn = oci.connect(f'{username}/{password}@{host}:{port}/{sid}')
+        conn = oci.connect(**DB_CONFIG)
         cursor = conn.cursor()
 
         try:
@@ -383,6 +392,7 @@ class BookRegisterPage(QMainWindow):
                     , publisher = :v_publisher
                     , release_dt = TO_DATE(:v_release_dt, 'YYYY-MM-DD')
                     , book_price = :v_book_price
+                    , book_img = :v_book_img
                     WHERE book_id = :v_book_id
                 '''
         
@@ -394,7 +404,8 @@ class BookRegisterPage(QMainWindow):
             'v_author': tuples[3],
             'v_publisher': tuples[4],
             'v_release_dt': release_dt,  # ✅ 수정된 값 적용
-            'v_book_price': tuples[6]
+            'v_book_price': tuples[6],
+            'v_book_img': tuples[7]
             })  
 
             conn.commit()  # 트랜잭션 커밋
@@ -414,7 +425,7 @@ class BookRegisterPage(QMainWindow):
 
     def delData(self, book_id):
         isSucceed = False
-        conn = oci.connect(f'{username}/{password}@{host}:{port}/{sid}')
+        conn = oci.connect(**DB_CONFIG)
         cursor = conn.cursor()
 
         try:

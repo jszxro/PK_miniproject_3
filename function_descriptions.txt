@@ -1,0 +1,139 @@
+# 주요 함수 설명
+
+## admin_manage.py
+1. `connectDB()`
+   - 데이터베이스 연결을 생성하고 반환합니다.
+
+2. `load_data()`
+   - 데이터베이스에서 고객 정보를 가져와 테이블 위젯에 표시합니다.
+
+3. `get_next_customer_id()`
+   - 데이터베이스에서 가장 큰 고객 ID를 가져와 +1 값을 반환합니다.
+
+4. `add_row()`
+   - 테이블 위젯에 새로운 빈 행을 추가하고 고객 ID를 자동으로 설정합니다.
+
+5. `save_data()`
+   - 테이블 위젯의 데이터를 데이터베이스에 저장합니다.
+   - 신규 고객은 INSERT, 기존 고객은 UPDATE 처리합니다.
+
+6. `delete_row()`
+   - 선택된 행의 고객 정보를 데이터베이스와 UI에서 삭제합니다.
+
+---
+
+## bkimg_url_make.py
+1. `base_url` 및 `headers`
+   - 알라딘 웹사이트에서 책 이미지 URL을 크롤링하기 위한 기본 URL과 헤더를 설정합니다.
+
+2. `for page in range(1, 7)`
+   - 1~6 페이지의 책 이미지 URL을 크롤링하여 CSV 파일에 저장합니다.
+
+---
+
+## search_page.py
+1. `update_results(results)`
+   - 검색 결과를 테이블 위젯에 표시합니다.
+   - 이미지 URL을 다운로드하여 테이블에 표시합니다.
+
+2. `open_book_qt(book_name)`
+   - 선택된 책의 정보를 가져와 `bookQT` 창에 전달합니다.
+
+3. `go_back()`
+   - 이전 페이지로 돌아갑니다.
+
+---
+
+## register_page.py
+1. `register()`
+   - 입력된 정보를 검증하고 데이터베이스에 새로운 고객 정보를 저장합니다.
+
+2. `is_email_exists(email)`
+   - 입력된 이메일이 이미 등록되어 있는지 확인합니다.
+
+3. `go_home()` 및 `go_back()`
+   - 각각 홈 페이지와 이전 페이지로 이동합니다.
+
+---
+
+## main_window.py
+1. `set_user_role(role)`
+   - 로그인한 사용자의 역할을 설정하고 네비게이션 바를 업데이트합니다.
+
+---
+
+## main_page.py
+1. `render_navbar(initial)`
+   - 사용자 역할에 따라 네비게이션 바를 동적으로 렌더링합니다.
+
+2. `search_books()`
+   - 입력된 검색어로 데이터베이스에서 책 정보를 검색하고 결과를 `SearchPage`에 전달합니다.
+
+3. `logout()`
+   - 로그아웃 처리 후 네비게이션 바를 초기 상태로 복원합니다.
+
+---
+
+## login_page.py
+1. `verify_credentials()`
+   - 입력된 이메일과 비밀번호를 검증하여 로그인 처리합니다.
+
+2. `clear_inputs()`
+   - 로그인 입력 필드를 초기화합니다.
+
+3. `show_register_page()`
+   - 회원가입 페이지로 이동합니다.
+
+---
+
+## list_page.py
+1. `loadBooksFromDB()`
+   - 데이터베이스에서 책 정보를 가져와 테이블 위젯에 표시합니다.
+
+2. `updateTable()`
+   - 현재 페이지의 책 데이터를 테이블 위젯에 업데이트합니다.
+
+3. `updatePaginationButtons()`
+   - 페이지네이션 버튼의 활성화 상태를 업데이트합니다.
+
+4. `firstPage()`, `lastPage()`, `prevPage()`, `nextPage()`
+   - 페이지네이션 기능을 구현합니다.
+
+---
+
+## bookregistermain.py
+1. `loadData()`
+   - 데이터베이스에서 책 정보를 가져와 테이블 위젯에 표시합니다.
+
+2. `btnAddClick()`
+   - 입력된 정보를 데이터베이스에 추가합니다.
+
+3. `btnModClick()`
+   - 선택된 책 정보를 수정합니다.
+
+4. `btnDelClick()`
+   - 선택된 책 정보를 삭제합니다.
+
+5. `clearInput()`
+   - 입력 필드를 초기화합니다.
+
+---
+
+## book_qt_3.py
+1. `loadData()`
+   - 데이터베이스에서 책 정보를 가져와 테이블 위젯에 표시합니다.
+
+2. `btnSeaClick()`
+   - 입력된 검색어로 책 정보를 검색하여 테이블에 표시합니다.
+
+3. `btnBorClick()`
+   - 선택된 책을 대출 처리합니다.
+
+4. `btnRetClick()`
+   - 선택된 책을 반납 처리합니다.
+
+5. `updateLoanStatus()`
+   - 대출 여부를 업데이트합니다.
+
+6. `btnClearClick()`
+   - 입력 필드를 초기화하고 전체 데이터를 다시 로드합니다.
