@@ -5,6 +5,9 @@ from subprocess import Popen
 import sys
 import os
 import cx_Oracle as oci  # cx_Oracle 추가
+from config import DB_CONFIG
+import cx_Oracle
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
 icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")  # 아이콘 위치

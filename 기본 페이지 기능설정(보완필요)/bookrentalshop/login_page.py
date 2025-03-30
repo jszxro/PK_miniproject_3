@@ -13,12 +13,13 @@ icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")
 icon2_path = os.path.join(BASE_DIR, "ref", "icon_image2.png")
 
 # DB 연결 설정
-# DB_CONFIG = {
-#     'user': 'bookrentalshop',
-#     'password': '12345',
-#     'dsn': cx_Oracle.makedsn('210.119.14.73', 1521, service_name='XE')
-# }
+DB_CONFIG = {
+    'user': 'bookrentalshop',
+    'password': '12345',
+    'dsn': cx_Oracle.makedsn('210.119.14.73', 1521, service_name='XE')
+}
 
+# from config import DB_CONFIG
 
 class LoginPage(QWidget):
     def __init__(self, stacked_widget, set_cst_role):
