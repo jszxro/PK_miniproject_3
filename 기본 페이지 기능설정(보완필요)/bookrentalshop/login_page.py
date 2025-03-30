@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # image_path_css = image_path.replace("\\", "/")
 icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")
 icon2_path = os.path.join(BASE_DIR, "ref", "icon_image2.png")
-
+import cx_Oracle
 # DB 연결 설정
 DB_CONFIG = {
     'user': 'bookrentalshop',
