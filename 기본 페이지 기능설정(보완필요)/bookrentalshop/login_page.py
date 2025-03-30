@@ -16,7 +16,7 @@ import cx_Oracle
 DB_CONFIG = {
     'user': 'bookrentalshop',
     'password': '12345',
-    'dsn': cx_Oracle.makedsn('210.119.14.73', 1521, service_name='XE')
+    'dsn': cx_Oracle.makedsn('localhost', 1522, service_name='XE')
 }
 
 # from config import DB_CONFIG
@@ -26,6 +26,7 @@ class LoginPage(QWidget):
         super().__init__()
         self.stacked_widget = stacked_widget
         self.set_cst_role = set_cst_role
+        self.cst_name = None  # 로그인한 유저의 이름 저장
         self.initUI()
 
     def clear_inputs(self):
@@ -175,19 +176,30 @@ class LoginPage(QWidget):
             cursor = connection.cursor()
 
             query = """
-                SELECT CST_ROLE FROM CUSTOMERINFO
+                SELECT CST_NAMES, CST_ROLE FROM CUSTOMERINFO
                 WHERE CST_EMAIL = :email AND CST_PWD = :password
             """
             cursor.execute(query, {'email': email, 'password': password})
             result = cursor.fetchone()
 
             if result:
-                role = result[0]
+                self.cst_name = result[0]  # CST_NAME 저장
+                role = result[1]
                 self.set_cst_role(role)
+
+                main_page = self.stacked_widget.widget(1)
+                main_page.render_navbar(initial=False)
+
                 if role == 'admin':
                     QMessageBox.information(self, "관리자 로그인", "관리자님, 환영합니다!")
                 else:
                     QMessageBox.information(self, "로그인 성공", "Bukjeokx2에 오신 것을 환영합니다 :)")
+
+                # 로그인한 유저 이름을 다른 페이지에 전달
+                for i in range(self.stacked_widget.count()):
+                    page = self.stacked_widget.widget(i)
+                    if hasattr(page, 'set_logged_in_user'):
+                        page.set_logged_in_user(self.cst_name)
 
                 main_page = self.stacked_widget.widget(1)
                 main_page.render_navbar(initial=False)
