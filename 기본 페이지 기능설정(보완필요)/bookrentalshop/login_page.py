@@ -16,7 +16,7 @@ import cx_Oracle
 DB_CONFIG = {
     'user': 'bookrentalshop',
     'password': '12345',
-    'dsn': cx_Oracle.makedsn('210.119.14.73', 1521, service_name='XE')
+    'dsn': cx_Oracle.makedsn('localhost', 1522, service_name='XE')
 }
 
 # from config import DB_CONFIG
@@ -189,15 +189,6 @@ class LoginPage(QWidget):
 
                 main_page = self.stacked_widget.widget(1)
                 main_page.render_navbar(initial=False)
-
-                from mypage import MyPage
-                mypage = MyPage(email)  # 로그인 이메일 그대로 사용
-                self.stacked_widget.addWidget(mypage)
-
-                # 마이페이지 인덱스를 main_page에 전달 (선택 사항)
-                main_page.mypage_index = self.stacked_widget.indexOf(mypage)
-                main_page.user_email = email  # 사용자 이메일 저장
-                
                 if role == 'admin':
                     QMessageBox.information(self, "관리자 로그인", "관리자님, 환영합니다!")
                 else:
