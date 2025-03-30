@@ -12,12 +12,17 @@ class ListPage(QWidget):
     def __init__(self, stacked_widget):
         super().__init__()
         self.stacked_widget = stacked_widget # 스택 위젯
+        self.logged_in_user = None  # 로그인한 유저 이름 저장
         self.current_page = 1  # 현재 페이지
         self.items_per_page = 15  # 페이지당 항목 수
         self.total_items = 0  # 총 항목 수
         self.book_data = []  # 책 데이터 리스트
         self.initUI() # UI 초기화
         self.loadBooksFromDB()  # DB에서 책 데이터 로드
+
+    def set_logged_in_user(self, user_name):
+        """로그인한 유저 이름 설정"""
+        self.logged_in_user = user_name
 
     def initUI(self):
         layout = QVBoxLayout()  # 수직 박스 레이아웃
@@ -236,7 +241,9 @@ class ListPage(QWidget):
             book_data = cursor.fetchone()
 
             if book_data:
-                self.user_register_window = bookQT(book_data)  # 책 정보를 전달
+                self.user_register_window = bookQT(book_data)
+                if self.logged_in_user:  # 로그인한 유저 이름이 있으면 전달
+                    self.user_register_window.input_std_username.setText(self.logged_in_user)
                 self.user_register_window.show()
             else:
                 QMessageBox.warning(self, "경고", "책 정보를 찾을 수 없습니다.")

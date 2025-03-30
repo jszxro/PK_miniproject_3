@@ -12,6 +12,7 @@ class SearchPage(QWidget):
     def __init__(self, stacked_widget, user_email=None):
         super().__init__()
         self.stacked_widget = stacked_widget
+        self.logged_in_user = None  # 로그인한 유저 이름 저장
         self.user_email = user_email
         self.initUI()
 
@@ -54,6 +55,10 @@ class SearchPage(QWidget):
 
         layout.addLayout(button_layout)
         self.setLayout(layout)  # 레이아웃 설정
+
+    def set_logged_in_user(self, user_name):
+        """로그인한 유저 이름 설정"""
+        self.logged_in_user = user_name
 
     def update_results(self, results):  # 검색 결과 표시
         self.result_table.setRowCount(0)  # 기존 데이터 초기화
@@ -139,6 +144,9 @@ class SearchPage(QWidget):
             book_data = cursor.fetchone()
 
             if book_data:
+                self.user_register_window = bookQT(book_data)
+                if self.logged_in_user:  # 로그인한 유저 이름이 있으면 전달
+                    self.user_register_window.input_std_username.setText(self.logged_in_user)
                 self.user_register_window = bookQT(book_data, user_email=self.user_email)  # 책 정보를 전달
                 self.user_register_window.show()
             else:

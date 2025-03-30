@@ -437,6 +437,7 @@ class bookQT(QMainWindow):
 
         self.btn_bor.setEnabled(False)
         self.btn_ret.setEnabled(False)
+        self.input_std_username.setEnabled(False)
 
         self.tblbook.setSelectionMode(QAbstractItemView.SingleSelection)
         self.tblbook.setColumnCount(5)
@@ -463,14 +464,12 @@ class bookQT(QMainWindow):
 
         for i, row in enumerate(books):
             for j, col in enumerate(row):
-                if j == 3:
-                    status = "가능" if col == '가능' else "불가능"
-                    self.tblbook.setItem(i, j, QTableWidgetItem(status))
-                else:
-                    self.tblbook.setItem(i, j, QTableWidgetItem(str(col)))
-
+                # 🔹 LOAN_YN 데이터를 그대로 출력
+                self.tblbook.setItem(i, j, QTableWidgetItem(str(col)))
+        
         cursor.close()
         conn.close()
+         
 
     def getInputValues(self):
         return (
@@ -602,20 +601,51 @@ class bookQT(QMainWindow):
             conn.close()
 
     def btnRetClick(self):
+        """도서 반납 기능"""
+        search_book_name = self.input_std_name.text().strip()
+        input_loan_user = self.input_std_username.text().strip()
+
+        if not search_book_name:
+            QMessageBox.warning(self, '경고', '반납할 도서 제목을 입력하세요!')
         book_name = self.input_std_name.text().strip()
         if not book_name:
             QMessageBox.warning(self, '입력 오류', '반납할 도서 제목을 입력하세요.')
+            return
+        if not input_loan_user:
+            QMessageBox.warning(self, '경고', '대출자명을 입력하세요!')
             return
 
         conn = self.connectDB()
         cursor = conn.cursor()
         try:
+
+            # 🔹 해당 도서가 대출 중인지 확인
+            cursor.execute("SELECT LOAN_USER FROM BOOKINFO WHERE BOOK_NAME = :1", (search_book_name,))
             cursor.execute("SELECT LOAN_USER FROM BOOKINFO WHERE BOOK_NAME = :1", (book_name,))
             book = cursor.fetchone()
             if not book or not book[0]:
                 QMessageBox.warning(self, '반납 실패', '이미 반납된 도서입니다.')
                 return
+            elif book[0] != input_loan_user:  # 대출자명이 일치하지 않는 경우
+                QMessageBox.warning(self, '반납 실패', '대출자명이 일치하지 않습니다!')
+                return
 
+            # 🔹 반납 처리 (BOOKINFO 테이블 업데이트)
+            query_return_book = """
+                UPDATE BOOKINFO
+                SET LOAN_YN = '가능', LOAN_USER = ''
+                WHERE BOOK_NAME = :1
+            """
+            cursor.execute(query_return_book, (search_book_name,))
+
+            conn.commit()  # 변경 사항 저장
+
+            QMessageBox.about(self, '반납 완료', f'"{search_book_name}" 도서가 반납되었습니다!')
+
+            # 🔹 대출 여부 자동 업데이트
+            self.updateLoanStatus()
+
+            # UI 업데이트
             cursor.execute("""
                 UPDATE BOOKINFO
                 SET LOAN_YN = '가능', LOAN_USER = ''
