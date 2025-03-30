@@ -189,7 +189,6 @@ class LoginPage(QWidget):
 
                 main_page = self.stacked_widget.widget(1)
                 main_page.render_navbar(initial=False)
-
                 if role == 'admin':
                     QMessageBox.information(self, "관리자 로그인", "관리자님, 환영합니다!")
                 else:
