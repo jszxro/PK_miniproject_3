@@ -1,17 +1,25 @@
 from PyQt5.QtWidgets import QWidget, QSizePolicy, QFrame, QHBoxLayout, QLabel, QVBoxLayout, QLineEdit, QPushButton, QMessageBox
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt
-import cx_Oracle
+import cx_Oracle as oci  # cx_Oracle 추가
 from main_page import MainPage 
 from register_page import RegisterPage
 import os
+from config import DB_CONFIG
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # image_path = os.path.join(BASE_DIR, "ref", "book_image.jpg")
 # image_path_css = image_path.replace("\\", "/")
 icon_path = os.path.join(BASE_DIR, "ref", "icon_image.png")
 icon2_path = os.path.join(BASE_DIR, "ref", "icon_image2.png")
 
-from config import DB_CONFIG
+# DB 연결 설정
+DB_CONFIG = {
+    'user': 'bookrentalshop',
+    'password': '12345',
+    'dsn': cx_Oracle.makedsn('210.119.14.73', 1521, service_name='XE')
+}
+
+# from config import DB_CONFIG
 
 class LoginPage(QWidget):
     def __init__(self, stacked_widget, set_cst_role):
@@ -118,6 +126,22 @@ class LoginPage(QWidget):
         """)
         login_btn.clicked.connect(self.verify_credentials)
 
+        # 홈으로 가기 버튼
+        back_button = QPushButton("홈으로 가기")
+        back_button.setFixedWidth(600)  # 로그인 버튼과 동일한 너비 설정
+        back_button.setStyleSheet("""
+            QPushButton {
+                padding: 15px;
+                border-radius: 10px;
+                background-color: #FFCCCC;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #f2a6a6;
+            }
+        """)
+        back_button.clicked.connect(self.go_home)  # 버튼 클릭 시 메인 페이지로 이동
+
         register_label = QLabel("<a href='#'>회원가입</a>  |  ID/PW 찾기  |  관리자 로그인")
         register_label.setStyleSheet("color: gray; font-size: 14px")
         register_label.setAlignment(Qt.AlignCenter)
@@ -128,6 +152,7 @@ class LoginPage(QWidget):
         form_layout.addWidget(self.email_input)
         form_layout.addWidget(self.password_input)
         form_layout.addWidget(login_btn)
+        form_layout.addWidget(back_button)  # 로그인 버튼 아래에 홈으로 가기 버튼 추가
         form_layout.addWidget(register_label)
 
         # 전체 배경색
@@ -146,7 +171,7 @@ class LoginPage(QWidget):
         password = self.password_input.text().strip()
 
         try:
-            connection = cx_Oracle.connect(**DB_CONFIG)
+            connection = oci.connect(**DB_CONFIG)
             cursor = connection.cursor()
 
             query = """
@@ -170,7 +195,7 @@ class LoginPage(QWidget):
             else:
                 QMessageBox.warning(self, "로그인 실패", "이메일 또는 비밀번호가 잘못되었습니다.")
 
-        except cx_Oracle.DatabaseError as e:
+        except oci.DatabaseError as e:
             QMessageBox.critical(self, "DB 오류", f"데이터베이스 연결에 실패했습니다.\n{str(e)}")
         finally:
             if 'cursor' in locals():
@@ -179,6 +204,7 @@ class LoginPage(QWidget):
                 connection.close()
 
     def go_home(self):
+        """홈으로 가기 버튼 클릭 시 메인 페이지로 이동"""
         self.stacked_widget.setCurrentIndex(1)
 
     def show_register_page(self):

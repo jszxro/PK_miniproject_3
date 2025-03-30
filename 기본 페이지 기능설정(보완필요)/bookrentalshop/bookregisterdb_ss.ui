@@ -60,8 +60,8 @@
          <widget class="QWidget" name="verticalLayoutWidget_2">
           <property name="geometry">
            <rect>
-            <x>842</x>
-            <y>57</y>
+            <x>840</x>
+            <y>50</y>
             <width>431</width>
             <height>361</height>
            </rect>
@@ -271,14 +271,44 @@
              </item>
             </layout>
            </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QLabel" name="label_8">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="text">
+                <string> 이 미 지 : </string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="input_book_img">
+               <property name="toolTip">
+                <string>등록하실 책의 이미지를 URL로 입력하세요.</string>
+               </property>
+               <property name="toolTipDuration">
+                <number>3</number>
+               </property>
+               <property name="placeholderText">
+                <string>등록하실 책의 이미지를 URL로 입력하세요.</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="horizontalLayoutWidget_8">
           <property name="geometry">
            <rect>
-            <x>859</x>
-            <y>440</y>
-            <width>401</width>
+            <x>850</x>
+            <y>430</y>
+            <width>411</width>
             <height>41</height>
            </rect>
           </property>

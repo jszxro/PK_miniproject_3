@@ -2,22 +2,23 @@ import sys
 import sqlite3
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QPushButton
-
+from config import DB_CONFIG
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 import cx_Oracle as oci
+import os
 # from PyQt5.QtCore import QSize
 
 # DB 연결 정보
-DB_INFO = {
-    "sid": "XE",
-    "host": "210.119.14.73",
-    "port": 1521,
-    "username": "bookrentalshop",
-    "password": "12345"
-}
+# DB_INFO = {
+#     "sid": "XE",
+#     "host": "210.119.14.73",
+#     "port": 1521,
+#     "username": "bookrentalshop",
+#     "password": "12345"
+# }
 
 # UI 파일 로드
 UI_FILE = "customer_ui.ui"
@@ -29,7 +30,9 @@ class CustomerManager(QMainWindow):
         # self.loadData()
 
     def initUI(self):
-        uic.loadUi('customer_ui.ui', self)
+        basedir = os.path.dirname(os.path.abspath(__file__))
+        ui_path = os.path.join(basedir, UI_FILE)
+        uic.loadUi(ui_path, self)  # UI 로드
         self.setWindowTitle('관리자 유저 관리 페이지')
         self.statusbar.showMessage('관리자 유저 관리 페이지')
     # def __init__(self):
@@ -58,13 +61,13 @@ class CustomerManager(QMainWindow):
         self.load_data()
 
     def connectDB(self):
-        return oci.connect(f"{DB_INFO['username']}/{DB_INFO['password']}@{DB_INFO['host']}:{DB_INFO['port']}/{DB_INFO['sid']}")
+        return oci.connect(**DB_CONFIG)
 
     def load_data(self):
         """데이터베이스에서 고객 정보를 불러와 테이블에 표시"""
         conn = self.connectDB()
         cursor = conn.cursor()
-        cursor.execute("SELECT CST_ID, CST_NAMES, CST_ADDRESS, CST_MOBILE, CST_EMAIL, CST_ROLE FROM CUSTOMERINFO")
+        cursor.execute("SELECT CST_ID, CST_NAMES, CST_ADDRESS, CST_MOBILE, CST_EMAIL, CST_ROLE FROM CUSTOMERINFO order by CST_ID")
         data = cursor.fetchall()
         conn.close()
 

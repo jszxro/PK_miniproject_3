@@ -2,26 +2,40 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
+from config import DB_CONFIG  # DB_CONFIG 임포트
 import cx_Oracle as oci
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # from PyQt5.QtCore import QSize
 
 # DB 연결 정보
-DB_INFO = {
-    "sid": "XE",
-    "host": "210.119.14.73",
-    "port": 1521,
-    "username": "bookrentalshop",
-    "password": "12345"
-}
+# DB_INFO = {
+#     "sid": "XE",
+#     "host": "210.119.14.73",
+#     "port": 1521,
+#     "username": "bookrentalshop",
+#     "password": "12345"
+# }
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
+
+class bookQT(QMainWindow):
+    def __init__(self, book=None):  # 수정: book 인수를 받을 수 있도록 변경
+        super(QMainWindow, self).__init__()
         self.initUI()
         self.loadData()
+        if book:
+            self.populate_fields(book)  # 전달받은 책 데이터를 필드에 채우기
+
+    # 전달받은 책 데이터를 필드에 채우는 메서드
+    def populate_fields(self, book):
+        self.input_std_name.setText(book[0])  # 책 제목
+        self.input_std_author.setText(book[1])  # 저자
+        self.input_std_pub.setText(book[2])  # 출판사
 
     def initUI(self):
-        uic.loadUi('book_qt_3.ui', self)
+        basedir = os.path.dirname(os.path.abspath(__file__))
+        ui_path = os.path.join(basedir, 'book_qt_3.ui')
+        uic.loadUi(ui_path, self)
         self.setWindowTitle('도서대출 예약 반납 서비스')
         self.statusbar.showMessage('도서대출 예약 반납 service')
 
@@ -63,7 +77,7 @@ class MainWindow(QMainWindow):
 
     
     def connectDB(self):
-        return oci.connect(f"{DB_INFO['username']}/{DB_INFO['password']}@{DB_INFO['host']}:{DB_INFO['port']}/{DB_INFO['sid']}")
+        return oci.connect(**DB_CONFIG)
     
     def loadData(self):
         conn = self.connectDB()
@@ -77,7 +91,7 @@ class MainWindow(QMainWindow):
         for i, row in enumerate(books):
             for j, col in enumerate(row):
                 if j == 3:  # 🔹 대출 여부 변환
-                    loan_status = "불가능" if col != "가능" else "불가능"
+                    loan_status = "가능" if col != "불가능" else "가능"
                     self.tblbook.setItem(i, j, QTableWidgetItem(loan_status))
                 else:
                     self.tblbook.setItem(i, j, QTableWidgetItem(str(col)))
@@ -87,7 +101,6 @@ class MainWindow(QMainWindow):
         conn.close()
 
     def loadCustomerData(self):
-        """고객 정보를 불러와서 테이블에 표시"""
         conn = self.connectDB()
         cursor = conn.cursor()
         query = "SELECT CST_NAMES FROM CUSTOMERINFO"
@@ -372,5 +385,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    win = MainWindow()
-    app.exec_()
+    window = bookQT()
+    window.show()
+    sys.exit(app.exec_())
